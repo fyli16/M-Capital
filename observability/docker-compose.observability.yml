@@ -1,4 +1,4 @@
-# Local observability stack for Aegis Capital.
+# Local observability stack for M Capital.
 #   docker compose -f observability/docker-compose.observability.yml up -d
 # Then point services at the collector: OTEL_ENABLED=true, OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317
 # Grafana: http://localhost:3000 (anonymous admin)

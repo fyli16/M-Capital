@@ -1,4 +1,4 @@
-"""SQLAlchemy ORM models — the persistence backbone of Aegis Capital.
+"""SQLAlchemy ORM models — the persistence backbone of M Capital.
 
 Enum-like columns are stored as ``TEXT`` guarded by ``CHECK`` constraints (see
 ``contracts.enums`` for rationale). Vectors use pgvector with an HNSW index defined

@@ -4,7 +4,7 @@ Revision ID: 0001_initial
 Revises:
 Create Date: 2026-07-25
 
-Creates the full Aegis Capital schema: users, research pipeline, debate, results,
+Creates the full M Capital schema: users, research pipeline, debate, results,
 performance tracking, and pgvector-backed memory. Enum-like columns use TEXT + CHECK.
 """
 from __future__ import annotations

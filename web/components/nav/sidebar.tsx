@@ -29,10 +29,10 @@ export function Sidebar() {
     <aside className="flex w-60 shrink-0 flex-col border-r border-border bg-card/50">
       <div className="flex h-16 items-center gap-2 border-b border-border px-5">
         <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-          <span className="font-bold">Æ</span>
+          <span className="font-bold">M</span>
         </div>
         <div className="leading-tight">
-          <p className="text-sm font-semibold">Aegis Capital</p>
+          <p className="text-sm font-semibold">M Capital</p>
           <p className="text-xs text-muted-foreground">AI Research Firm</p>
         </div>
       </div>

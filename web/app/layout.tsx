@@ -4,7 +4,7 @@ import "@/app/globals.css";
 import { AuthProvider } from "@/lib/auth";
 
 export const metadata: Metadata = {
-  title: "Aegis Capital — AI Investment Research",
+  title: "M Capital — AI Investment Research",
   description: "Multi-agent AI investment research firm.",
 };
 

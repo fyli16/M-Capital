@@ -1,4 +1,4 @@
-# Aegis Capital performance-worker (scheduled task). Build context = repo root:
+# M Capital performance-worker (scheduled task). Build context = repo root:
 #   docker build -f services/performance-worker/Dockerfile -t aegis/performance-worker .
 FROM python:3.12-slim AS base
 

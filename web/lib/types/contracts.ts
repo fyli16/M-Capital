@@ -1,5 +1,5 @@
 /**
- * Aegis Capital — shared contract types (frontend).
+ * M Capital — shared contract types (frontend).
  *
  * Hand-authored mirror of `packages/aegis_shared/contracts`. Keep in sync with the
  * Python source of truth. In CI, `make export-schemas` emits JSON Schema which can

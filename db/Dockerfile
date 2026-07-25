@@ -1,4 +1,4 @@
-# Aegis Capital DB migrator. Build context = repository root:
+# M Capital DB migrator. Build context = repository root:
 #   docker build -f db/Dockerfile -t aegis/migrate .
 # Runs `alembic upgrade head` against $DATABASE_URL, then exits.
 FROM python:3.12-slim

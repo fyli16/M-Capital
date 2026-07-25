@@ -18,7 +18,7 @@ from .runner import run_analysis
 
 def _print_report(state) -> None:
     rec = state.get("recommendation")
-    print(f"\n=== Aegis Capital - {state['ticker']} ===")
+    print(f"\n=== M Capital - {state['ticker']} ===")
     if rec is not None:
         print(f"Recommendation : {rec.recommendation.value.upper()}")
         print(f"Confidence     : {rec.confidence:.0%}")

@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aegis-performance-worker"
 version = "0.1.0"
-description = "Aegis Capital performance-worker: realized returns + agent correctness scoring."
+description = "M Capital performance-worker: realized returns + agent correctness scoring."
 requires-python = ">=3.11"
 # NOTE: install the shared package first:  pip install -e packages/aegis_shared
 dependencies = [

@@ -1,4 +1,4 @@
-# Aegis Capital — developer entrypoints.
+# M Capital — developer entrypoints.
 # On Windows without `make`, run the commands shown here directly in PowerShell.
 
 DB_URL ?= postgresql+psycopg://aegis:aegis@localhost:5432/aegis

@@ -1,6 +1,6 @@
 # Architecture Decision Records
 
-Short, immutable records of the significant technical decisions behind Aegis Capital.
+Short, immutable records of the significant technical decisions behind M Capital.
 Each ADR captures the context, the decision, and its consequences at the time it was made.
 
 | # | Decision | Status |

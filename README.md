@@ -1,9 +1,9 @@
-# Aegis Capital — Multi-Agent AI Investment Research Firm
+# M Capital — Multi-Agent AI Investment Research Firm
 
 A cloud-native platform where specialized AI analyst agents collaborate, debate, and
 produce auditable investment recommendations.
 
-> **Disclaimer:** Aegis Capital produces *simulated research* for engineering and
+> **Disclaimer:** M Capital produces *simulated research* for engineering and
 > educational purposes. It is **not** financial advice and never auto-executes trades.
 
 ## Status

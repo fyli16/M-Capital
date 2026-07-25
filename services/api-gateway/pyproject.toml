@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "aegis-api-gateway"
 version = "0.1.0"
-description = "Aegis Capital API gateway: FastAPI REST + auth + enqueue + SSE."
+description = "M Capital API gateway: FastAPI REST + auth + enqueue + SSE."
 requires-python = ">=3.11"
 # NOTE: install the shared package first:  pip install -e packages/aegis_shared
 dependencies = [

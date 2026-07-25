@@ -1,3 +1,3 @@
-"""Aegis Capital API gateway."""
+"""M Capital API gateway."""
 
 __version__ = "0.1.0"

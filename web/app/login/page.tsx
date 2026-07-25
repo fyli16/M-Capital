@@ -42,9 +42,9 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-2xl font-bold text-primary-foreground">
-            Æ
+            M
           </div>
-          <CardTitle className="text-xl">Aegis Capital</CardTitle>
+          <CardTitle className="text-xl">M Capital</CardTitle>
           <CardDescription>
             {mode === "login" ? "Sign in to your desk" : "Create an analyst account"}
           </CardDescription>

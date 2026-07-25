@@ -1,4 +1,4 @@
-# Aegis Capital agent-worker. Build context = repository root:
+# M Capital agent-worker. Build context = repository root:
 #   docker build -f services/agent-worker/Dockerfile -t aegis/agent-worker .
 FROM python:3.12-slim AS base
 

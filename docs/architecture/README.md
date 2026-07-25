@@ -1,4 +1,4 @@
-# Aegis Capital — Architecture
+# M Capital — Architecture
 
 > Multi-agent AI investment research platform. Event-driven, cloud-native, auditable.
 
@@ -15,7 +15,7 @@
 ```mermaid
 graph TB
     User([Analyst])
-    subgraph Aegis["Aegis Capital"]
+    subgraph Aegis["M Capital"]
         FE[Next.js Dashboard]
         API[FastAPI Gateway]
         ORCH[LangGraph Orchestrator]

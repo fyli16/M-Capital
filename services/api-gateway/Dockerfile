@@ -1,4 +1,4 @@
-# Aegis Capital API gateway. Build context = repository root:
+# M Capital API gateway. Build context = repository root:
 #   docker build -f services/api-gateway/Dockerfile -t aegis/api-gateway .
 FROM python:3.12-slim AS base
 

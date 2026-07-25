@@ -1,6 +1,6 @@
 # Data Model & ER Diagram
 
-Canonical schema for Aegis Capital. Source of truth: SQLAlchemy models in
+Canonical schema for M Capital. Source of truth: SQLAlchemy models in
 [`packages/aegis_shared/aegis_shared/db/models.py`](../../packages/aegis_shared/aegis_shared/db/models.py),
 materialized by the Alembic migration
 [`0001_initial_schema.py`](../../db/migrations/versions/0001_initial_schema.py).
