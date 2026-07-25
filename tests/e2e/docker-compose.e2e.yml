@@ -1,0 +1,100 @@
+# Full-stack end-to-end environment for integration tests.
+#   docker compose -f tests/e2e/docker-compose.e2e.yml up --build -d
+#   pytest tests/e2e
+#   docker compose -f tests/e2e/docker-compose.e2e.yml down -v
+#
+# Uses the FAKE LLM + synthetic data providers, so no API keys are required.
+name: aegis-e2e
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: aegis
+      POSTGRES_PASSWORD: aegis
+      POSTGRES_DB: aegis
+    ports: ["5432:5432"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aegis -d aegis"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  localstack:
+    image: localstack/localstack:3.5
+    environment:
+      SERVICES: sqs
+      DEBUG: "0"
+    ports: ["4566:4566"]
+    volumes:
+      - ./localstack/ready.d:/etc/localstack/init/ready.d
+    healthcheck:
+      test: ["CMD-SHELL", "awslocal sqs list-queues || exit 1"]
+      interval: 4s
+      timeout: 5s
+      retries: 20
+
+  migrate:
+    build:
+      context: ../..
+      dockerfile: db/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://aegis:aegis@postgres:5432/aegis
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ../..
+      dockerfile: services/api-gateway/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://aegis:aegis@postgres:5432/aegis
+      REDIS_URL: redis://redis:6379/0
+      SQS_ENDPOINT_URL: http://localstack:4566
+      SQS_RESEARCH_QUEUE_URL: http://localstack:4566/000000000000/aegis-research
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      JWT_SECRET: e2e-secret-that-is-at-least-32-bytes-long!!
+    ports: ["8000:8000"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      localstack:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request;urllib.request.urlopen('http://localhost:8000/health')\" || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  worker:
+    build:
+      context: ../..
+      dockerfile: services/agent-worker/Dockerfile
+    command: ["python", "-m", "app", "consume"]
+    environment:
+      LLM_PROVIDER: fake
+      DATA_PROVIDER: synthetic
+      DATABASE_URL: postgresql+psycopg://aegis:aegis@postgres:5432/aegis
+      REDIS_URL: redis://redis:6379/0
+      SQS_ENDPOINT_URL: http://localstack:4566
+      SQS_RESEARCH_QUEUE_URL: http://localstack:4566/000000000000/aegis-research
+      AWS_REGION: us-east-1
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      localstack:
+        condition: service_healthy

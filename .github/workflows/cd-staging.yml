@@ -1,0 +1,106 @@
+name: CD (staging)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  id-token: write   # OIDC to assume the AWS deploy role
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  TF_DIR: infra/terraform
+  ENV_NAME: staging
+
+jobs:
+  deploy:
+    name: Build, push, and deploy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - uses: hashicorp/setup-terraform@v3
+        with: { terraform_version: "1.9.5" }
+
+      - name: Terraform init
+        working-directory: ${{ env.TF_DIR }}
+        run: terraform init -backend-config=env/${{ env.ENV_NAME }}.backend.hcl
+
+      # Registries must exist before we can push images.
+      - name: Terraform apply (ECR only)
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          terraform apply -auto-approve \
+            -var-file=env/${{ env.ENV_NAME }}.tfvars \
+            -target=aws_ecr_repository.api \
+            -target=aws_ecr_repository.worker \
+            -target=aws_ecr_repository.perf \
+            -target=aws_ecr_repository.migrate
+
+      - name: Login to Amazon ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build & push images
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+          TAG: ${{ github.sha }}
+        run: |
+          set -euo pipefail
+          build_push() { # name dockerfile
+            repo="$REGISTRY/aegis-${ENV_NAME}/$1"
+            docker build -f "$2" -t "$repo:$TAG" -t "$repo:latest" .
+            docker push "$repo:$TAG"
+            docker push "$repo:latest"
+          }
+          build_push api-gateway         services/api-gateway/Dockerfile
+          build_push agent-worker        services/agent-worker/Dockerfile
+          build_push performance-worker  services/performance-worker/Dockerfile
+          build_push migrate             db/Dockerfile
+
+      - name: Terraform apply (full)
+        working-directory: ${{ env.TF_DIR }}
+        env:
+          TF_VAR_openai_api_key: ${{ secrets.OPENAI_API_KEY }}
+          TF_VAR_sec_user_agent: ${{ secrets.SEC_USER_AGENT }}
+        run: |
+          terraform apply -auto-approve \
+            -var-file=env/${{ env.ENV_NAME }}.tfvars \
+            -var="image_tag=${{ github.sha }}"
+
+      - name: Run database migrations
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          set -euo pipefail
+          CLUSTER=$(terraform output -raw ecs_cluster_name)
+          FAMILY=$(terraform output -raw migrate_task_family)
+          SG=$(terraform output -raw task_security_group_id)
+          SUBNETS=$(terraform output -json task_subnet_ids | jq -r 'join(",")')
+          TASK_ARN=$(aws ecs run-task \
+            --cluster "$CLUSTER" --launch-type FARGATE \
+            --task-definition "$FAMILY" \
+            --network-configuration "awsvpcConfiguration={subnets=[$SUBNETS],securityGroups=[$SG],assignPublicIp=DISABLED}" \
+            --query 'tasks[0].taskArn' --output text)
+          echo "migration task: $TASK_ARN"
+          aws ecs wait tasks-stopped --cluster "$CLUSTER" --tasks "$TASK_ARN"
+          EXIT=$(aws ecs describe-tasks --cluster "$CLUSTER" --tasks "$TASK_ARN" \
+            --query 'tasks[0].containers[0].exitCode' --output text)
+          echo "migration exit code: $EXIT"
+          test "$EXIT" = "0"
+
+      - name: Force new ECS deployments
+        working-directory: ${{ env.TF_DIR }}
+        run: |
+          CLUSTER=$(terraform output -raw ecs_cluster_name)
+          API=$(terraform output -raw api_service_name)
+          WORKER=$(terraform output -raw worker_service_name)
+          aws ecs update-service --cluster "$CLUSTER" --service "$API" --force-new-deployment
+          aws ecs update-service --cluster "$CLUSTER" --service "$WORKER" --force-new-deployment

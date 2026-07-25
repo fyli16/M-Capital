@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aegis-performance-worker"
+version = "0.1.0"
+description = "Aegis Capital performance-worker: realized returns + agent correctness scoring."
+requires-python = ">=3.11"
+# NOTE: install the shared package first:  pip install -e packages/aegis_shared
+dependencies = [
+    "pydantic>=2.6,<3",
+    "pydantic-settings>=2.2",
+    "sqlalchemy>=2.0,<3",
+    "psycopg[binary]>=3.1",
+]
+
+[project.optional-dependencies]
+live = ["yfinance>=0.2.40"]
+dev = [
+    "pytest>=8",
+    "ruff>=0.4",
+    "mypy>=1.9",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["app*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"

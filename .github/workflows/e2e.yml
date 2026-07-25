@@ -1,0 +1,41 @@
+name: E2E
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  e2e:
+    name: End-to-end (compose stack)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Start stack
+        run: docker compose -f tests/e2e/docker-compose.e2e.yml up --build -d
+
+      - name: Wait for API health
+        run: |
+          for i in $(seq 1 40); do
+            if curl -sf http://localhost:8000/health | grep -q '"database":true'; then
+              echo "API healthy"; exit 0
+            fi
+            sleep 3
+          done
+          echo "API failed to become healthy"; exit 1
+
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - name: Run e2e tests
+        run: |
+          pip install -r tests/e2e/requirements.txt
+          pytest tests/e2e -v
+
+      - name: Dump logs on failure
+        if: failure()
+        run: docker compose -f tests/e2e/docker-compose.e2e.yml logs --no-color
+
+      - name: Tear down
+        if: always()
+        run: docker compose -f tests/e2e/docker-compose.e2e.yml down -v
