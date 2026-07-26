@@ -10,7 +10,7 @@ produce auditable investment recommendations.
 <!-- Built in reviewable increments. Current increment: **Database schema + shared contracts**. -->
 
 | Increment | Scope | 
-|---|---|---|
+|---|---|
 | 1 | Monorepo base + local DB stack |
 | 2 | Shared contracts (agent I/O + API DTOs) | 
 | 3 | SQLAlchemy models + pgvector | 
