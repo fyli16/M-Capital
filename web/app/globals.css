@@ -26,6 +26,13 @@
     --neutral: 40 90% 55%;
 
     --radius: 0.6rem;
+
+    /* Native, high-legibility font stacks (no remote fetch required) */
+    --font-sans: "Segoe UI Variable", "Segoe UI", -apple-system,
+      BlinkMacSystemFont, "SF Pro Text", Roboto, "Helvetica Neue", Arial,
+      "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+    --font-mono: "Cascadia Code", "JetBrains Mono", "SF Mono", "Fira Code",
+      Consolas, "Liberation Mono", Menlo, monospace;
   }
 }
 
