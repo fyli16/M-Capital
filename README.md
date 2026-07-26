@@ -3,28 +3,27 @@
 A cloud-native platform where specialized AI analyst agents collaborate, debate, and
 produce auditable investment recommendations.
 
-> **Disclaimer:** M Capital produces *simulated research* for engineering and
-> educational purposes. It is **not** financial advice and never auto-executes trades.
+> **Disclaimer:** M Capital produces *simulated research*. It is **not** financial advice and never auto-executes trades.
 
-## Status
+## Build steps
 
-Built in reviewable increments. Current increment: **Database schema + shared contracts**.
+<!-- Built in reviewable increments. Current increment: **Database schema + shared contracts**. -->
 
-| Increment | Scope | State |
+| Increment | Scope | 
 |---|---|---|
-| 1 | Monorepo base + local DB stack | ✅ |
-| 2 | Shared contracts (agent I/O + API DTOs) | ✅ |
-| 3 | SQLAlchemy models + pgvector | ✅ |
-| 4 | Alembic initial migration | ✅ |
-| 5 | TypeScript contract mirror | ✅ |
-| 6 | ER diagram + docs | ✅ |
-| 7 | agent-worker (LangGraph, 6 agents, debate, memory) | ✅ |
-| 8 | Real data providers (Yahoo Finance + SEC EDGAR) | ✅ |
-| 9 | Observability (OpenTelemetry + Grafana) | ✅ |
-| 10 | api-gateway (FastAPI, JWT/RBAC, SSE, SQS) | ✅ |
-| 11 | performance-worker (returns + agent scoring) | ✅ |
-| 12 | web (Next.js dashboard: 6 views, live SSE/poll) | ✅ |
-| 13 | infra (Terraform: ECS Fargate, RDS, Redis, SQS) + CI/CD | ✅ |
+| 1 | Monorepo base + local DB stack |
+| 2 | Shared contracts (agent I/O + API DTOs) | 
+| 3 | SQLAlchemy models + pgvector | 
+| 4 | Alembic initial migration | 
+| 5 | TypeScript contract mirror | 
+| 6 | ER diagram + docs | 
+| 7 | agent-worker (LangGraph, 6 agents, debate, memory) | 
+| 8 | Real data providers (Yahoo Finance + SEC EDGAR) | 
+| 9 | Observability (OpenTelemetry + Grafana) | 
+| 10 | api-gateway (FastAPI, JWT/RBAC, SSE, SQS) | 
+| 11 | performance-worker (returns + agent scoring) | 
+| 12 | web (Next.js dashboard: 6 views, live SSE/poll) | 
+| 13 | infra (Terraform: ECS Fargate, RDS, Redis, SQS) + CI/CD | 
 
 ## Repository layout
 
