@@ -28,7 +28,7 @@ produce auditable investment recommendations.
 ## Repository layout
 
 ```
-aegis-capital/
+M-capital/
 ├── docker-compose.yml        # Postgres+pgvector, Redis (local dev)
 ├── Makefile                  # dev entrypoints
 ├── packages/aegis_shared/    # SINGLE SOURCE OF TRUTH: Pydantic contracts + SQLAlchemy models
