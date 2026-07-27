@@ -1,0 +1,105 @@
+M CAPITAL — LAUNCH GUIDE
+========================
+
+Two ways to run the LLM agents:
+  - fake   : deterministic offline outputs, no API key (default)
+  - openai : real OpenAI calls (needs OPENAI_API_KEY; blocked on BASF network)
+
+
+-------------------------------------------------------------------------------
+A. BACKEND — FULL STACK (Postgres + Redis + SQS + API gateway + worker)
+-------------------------------------------------------------------------------
+Run from the repo root.
+
+Genuine OpenAI (personal network, no corporate web filter):
+    export OPENAI_API_KEY=sk-...
+    docker compose \
+      -f tests/e2e/docker-compose.e2e.yml \
+      -f tests/e2e/docker-compose.override.yml \
+      up --build -d
+
+Fake mode (offline, no key) — just omit the override:
+    docker compose -f tests/e2e/docker-compose.e2e.yml up --build -d
+
+Verify:
+    docker compose -f tests/e2e/docker-compose.e2e.yml ps
+    curl -s http://localhost:8000/health
+    docker compose -f tests/e2e/docker-compose.e2e.yml logs -f worker
+
+API is now at http://localhost:8000
+
+Tear down (add the override flag too if you used it):
+    docker compose -f tests/e2e/docker-compose.e2e.yml down -v
+
+
+-------------------------------------------------------------------------------
+B. CREATE A USER + SUBMIT RESEARCH (backend only, via curl)
+-------------------------------------------------------------------------------
+No user is seeded. Register one (role "analyst" can submit; "viewer" cannot).
+
+    # register
+    curl -s -X POST http://localhost:8000/api/v1/auth/register \
+      -H 'Content-Type: application/json' \
+      -d '{"email":"me@example.com","password":"supersecret-e2e","role":"analyst"}'
+
+    # get a token
+    TOKEN=$(curl -s -X POST http://localhost:8000/api/v1/auth/token \
+      -d 'username=me@example.com&password=supersecret-e2e' \
+      | python3 -c 'import sys,json;print(json.load(sys.stdin)["access_token"])')
+
+    # submit a ticker (hits the worker -> genuine OpenAI if override is used)
+    curl -s -X POST http://localhost:8000/api/v1/research \
+      -H "Authorization: Bearer $TOKEN" -H 'Content-Type: application/json' \
+      -d '{"ticker":"NVDA","enable_debate":true,"max_debate_rounds":3}'
+    # -> {"request_id":"..."}
+
+    # poll the result (status: queued -> running -> complete)
+    curl -s http://localhost:8000/api/v1/research/<request_id> \
+      -H "Authorization: Bearer $TOKEN" | python3 -m json.tool
+
+
+-------------------------------------------------------------------------------
+C. WEB FRONTEND (Next.js) — run directly, not in Docker
+-------------------------------------------------------------------------------
+    cd web
+    cp .env.local.example .env.local     # already points at http://localhost:8000
+    npm install
+    npm run dev
+
+Open http://localhost:3000 and log in with the account registered in step B.
+Frontend reads NEXT_PUBLIC_API_URL from web/.env.local (default localhost:8000).
+
+
+-------------------------------------------------------------------------------
+D. QUICK LOCAL ONE-SHOT (no Docker, no SQS) — genuine reasoning
+-------------------------------------------------------------------------------
+Runs a single ticker through the whole agent graph and prints the result.
+
+    source .venv/bin/activate           # make sure the venv is active
+    cd services/agent-worker
+    cp .env.example .env                # edit .env: set OPENAI_API_KEY, LLM_PROVIDER=openai
+    python -m app --ticker NVDA
+
+Options:
+    python -m app --ticker AAPL --rounds 2
+    python -m app --ticker MSFT --no-debate
+    python -m app --ticker TSLA --json
+
+NOTE: "python -m app consume" is the SQS queue worker (needs a queue); use it
+only inside the full Docker stack, not on the host.
+
+
+-------------------------------------------------------------------------------
+NOTES
+-------------------------------------------------------------------------------
+- The e2e worker image installs the `openai` extra, so no rebuild is needed to
+  switch providers.
+- DATA_PROVIDER stays "synthetic" in Docker (image lacks the `live` extra).
+- BASF corporate network blocks api.openai.com (web filter -> urlblock.php).
+  Genuine OpenAI only works off the corporate network (or via an approved
+  internal Azure OpenAI / gateway endpoint).
+- Relevant files:
+    tests/e2e/docker-compose.e2e.yml        base stack (fake LLM)
+    tests/e2e/docker-compose.override.yml   genuine-OpenAI toggle
+    services/agent-worker/.env.example      local (non-Docker) config template
+    web/.env.local.example                  frontend API URL
