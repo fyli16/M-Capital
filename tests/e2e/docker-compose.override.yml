@@ -1,0 +1,30 @@
+# Genuine-LLM override for the e2e stack.
+#
+# The base tests/e2e/docker-compose.e2e.yml runs the worker with the FAKE LLM.
+# This override flips the worker to real OpenAI. The API key is read from your
+# shell environment (never hard-code secrets in a committed file).
+#
+# Usage (key must be exported in the shell that runs compose):
+#   export OPENAI_API_KEY=sk-...
+#   docker compose \
+#     -f tests/e2e/docker-compose.e2e.yml \
+#     -f tests/e2e/docker-compose.override.yml \
+#     up --build -d
+#
+# Notes:
+#  - The worker image installs the `openai` extra already, so no rebuild of deps
+#    is needed for the provider itself.
+#  - DATA_PROVIDER stays `synthetic` because the image does not include the
+#    `live` extra (yfinance/vaderSentiment). Real market/SEC data would require
+#    adding `live` to the Dockerfile's pip install.
+#  - `${OPENAI_API_KEY:?...}` makes compose fail fast with a clear message if the
+#    variable is not set, instead of silently starting in a broken state.
+
+services:
+  worker:
+    environment:
+      LLM_PROVIDER: openai
+      OPENAI_API_KEY: ${OPENAI_API_KEY:?set OPENAI_API_KEY in your shell before running}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o}
+      OPENAI_EMBEDDING_MODEL: ${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      DATA_PROVIDER: synthetic
